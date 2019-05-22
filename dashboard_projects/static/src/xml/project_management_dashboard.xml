@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates >
+   <t t-name="overdue_tasks_template">
+      <ul class="list-task list-group" data-role="tasklist">
+          <li class="list-group-item" data-role="task">
+            <div class="row">
+               <div class="col-lg-10">
+                  <strong>Title</strong>
+               </div>
+               <div class="col-lg-2">
+                  <strong>Due Date</strong>
+               </div>
+            </div>
+         </li>
+         <t t-foreach="overdue_tasks" t-as="task">
+            <li class="list-group-item" data-role="task">
+               <div class="row">
+                  <div class="col-lg-10">
+                      <t t-esc="task.name"/><a href="#" class="text-danger"><t t-esc="project_id"/></a>
+                  </div>
+                  <div class="col-lg-2">
+                     <label class="label label-danger"><t t-esc="task.date_deadline"/></label>
+                  </div>
+               </div>
+            </li>
+         </t>
+         
+      </ul>
+   </t>
+   
+   <t t-name="pending_issue_template">
+      <ul class="list-task list-group" data-role="tasklist">
+         <ul class="list-task list-group" data-role="tasklist">
+            <t t-foreach="pending_issues" t-as="issue">
+               <li class="list-group-item" data-role="task">
+                  <t t-esc="issue.name"/> <a href="#" class="text-danger"><t t-esc="project_id"/></a>
+               </li>
+            </t>
+         </ul>
+      </ul>
+   </t>
+   
+   <t t-name="project_time_activity">
+      <t t-foreach="project_messages" t-as="message">
+         <div class="sl-item">
+            <div class="sl-left"><i class="fa fa-circle text-info"></i>
+            </div>
+            <div class="sl-right">
+               <div>
+                  <h6><a href="#" class="text-danger"><t t-esc="message.project"/>:</a> <t t-raw="message.body"/></h6>
+                  <span class="sl-date"><t t-esc="message.date"/></span>
+               </div>
+            </div>
+         </div>
+      </t>
+   </t>
+   
+   
+   <t t-name="user_activity_timeline">
+      <t t-foreach="user_activity_timeline" t-as="activity">
+         <div class="sl-item">
+            <div class="sl-left">
+               <img t-att-src="activity.user_image" alt="user" class="img-circle"/>
+            </div>
+            <div class="sl-right">
+               <div class="m-l-40">
+                  <a href="#" class="text-success"><t t-esc="activity.user_name"/></a> <span class="sl-date"><t t-esc="activity.date"/></span>
+                  <p><t t-raw="activity.body"/><strong><t t-raw="activity.name"/></strong></p>
+               </div>
+            </div>
+         </div>
+         <hr/>
+      </t>
+   </t>
+   
+   <t t-name="Prjects_dashboard">
+      <div class="projects-container">
+         <select id="projects_selectbox">
+            <option value="-1">--- All Projects ---</option>
+         </select>        
+      </div>
+      <div class="clearfix"></div>
+      <div class="">
+         <div class="first-client-block">
+            <div class="white-box">
+               <div class="row row-in">
+                  <div class="col-3 row-in-br">
+                     <div class="col-in">
+                        <h3 class="box-title">Total Clients</h3>
+                        <ul class="list-inline two-part">
+                           <li><i class="fa fa-users text-success"></i></li>
+                           <li class="text-right"><span class="counter total_clients">0</span></li>
+                        </ul>
+                     </div>
+                  </div>
+                  <div class="col-3 row-in-br  b-r-none">
+                     <div class="col-in">
+                        <h3 class="box-title">Total Employees</h3>
+                        <ul class="list-inline two-part">
+                           <li><i class="fa fa-user text-warning"></i></li>
+                           <li class="text-right"><span class="counter total_employees">0</span></li>
+                        </ul>
+                     </div>
+                  </div>
+                  <div class="col-3 row-in-br">
+                     <div class="col-in">
+                        <h3 class="box-title">Total Projects</h3>
+                        <ul class="list-inline two-part">
+                           <li><i class="fa fa-clipboard text-danger"></i></li>
+                           <li class="text-right"><span class="counter total_projects">0</span></li>
+                        </ul>
+                     </div>
+                  </div>
+                  <div class="col-3 b-0">
+                     <div class="col-in">
+                        <h3 class="box-title">Total Paid Invoices</h3>
+                        <ul class="list-inline two-part">
+                           <li><i class="fa fa-money text-inverse"></i></li>
+                           <li class="text-right"><span class="counter total_paid_invoice">0</span></li>
+                        </ul>
+                     </div>
+                  </div>
+               </div>
+               <div class="clearfix"></div>
+            </div>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-4">
+            <div class="white-box">
+               <div class="col-sm-12">
+                  <div class="">
+                     <div class="row-in">
+                        <div class="col-md-12 col-sm-12">
+                           <div class="col-in">
+                              <h3 class="box-title">Total Hours Logged</h3>
+                              <ul class="list-inline two-part">
+                                 <li><i class="fa fa-clock-o text-info"></i></li>
+                                 <li class="text-right"><span class="counter total_hour_logged">0</span></li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="clearfix"></div>
+            </div>
+         </div>
+         <div class="col-8">
+            <div class="white-box">
+               <div class="col-xs-12">
+                  <div class="">
+                     <div class="pull-right">
+                        <a href="javascript: void(0)" id="get_chart_employee_timesheet" class="chart-timesheet-link chart-timesheet-link-1 active">Employee / Timesheet</a> |
+                        <a href="javascript: void(0)" id="get_chart_project_timesheet" class="chart-timesheet-link">Project / Timesheet</a>
+                     </div>
+                     <div id="chart_timesheet"/>
+                  </div>
+               </div>
+            <div class="clearfix"></div>
+            </div>
+         </div>
+         <div class="clearfix"></div>
+      </div>
+      <div class="row">
+         <div class="col-4">
+            <div class="white-box">
+               <div class="col-sm-12">
+                  <div class="">
+                     <div class="row-in">
+                        <div class="col-12">
+                           <div class="col-in">
+                              <h3 class="box-title">Total Completed Tasks</h3>
+                              <ul class="list-inline two-part">
+                                 <li><i class="fa fa-check-square-o text-success"></i></li>
+                                 <li class="text-right"><span class="counter total_complete_tasks">0</span></li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-12">
+                  <div class="">
+                     <div class="row-in">
+                        <div class="col-12 row-in-bottom">
+                           <div class="col-in">
+                              <h3 class="box-title">Total overdue Tasks</h3>
+                              <ul class="list-inline two-part">
+                                 <li><i class="fa fa-exclamation-triangle text-danger"></i></li>
+                                 <li class="text-right"><span class="counter total_overdue_tasks">0</span></li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-12">
+                  <div class="">
+                     <div class="row-in">
+                        <div class="col-md-12 col-sm-12 row-in-bottom">
+                           <div class="col-in">
+                              <h3 class="box-title">Total Pending Tasks</h3>
+                              <ul class="list-inline two-part">
+                                 <li><i class="fa fa-tasks text-warning"></i></li>
+                                 <li class="text-right"><span class="counter total_pending_tasks">0</span></li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="clearfix"></div>
+            </div>
+         </div>
+         <div class="col-8">
+            <div class="white-box">
+               <div class="col-12">
+                  <div class="">
+                     <div class="pull-right">
+                        <a href="javascript: void(0)" id="get_chart_employee_task" class="chart-tasks-link chart-issues-link-1 active">Employee / Tasks</a> |
+                        <a href="javascript: void(0)" id="get_chart_project_task" class="chart-tasks-link">Project / Tasks</a>
+                     </div>
+                     <div id="chart_employee_tasks"/>
+                  </div>
+               </div>
+            <div class="clearfix"></div>
+            </div>
+         </div>
+         <div class="clearfix"></div>
+      </div>
+      <div class="row" style="display:none">
+         <div class="col-4">
+            <div class="white-box">
+               <div class="col-12">
+                  <div class="">
+                     <div class="row-in">
+                        <div class="col-md-12 col-sm-12">
+                           <div class="col-in">
+                              <h3 class="box-title">Resolved Issues</h3>
+                              <ul class="list-inline two-part">
+                                 <li><i class="fa fa-ticket text-success"></i></li>
+                                 <li class="text-right"><span class="counter total_resolved_issues">0</span></li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-sm-12">
+                  <div class="">
+                     <div class="row-in">
+                        <div class="col-md-12 col-sm-12 row-in-bottom">
+                           <div class="col-in">
+                              <h3 class="box-title">Unresolved Issues</h3>
+                              <ul class="list-inline two-part">
+                                 <li><i class="fa fa-ticket text-danger"></i></li>
+                                 <li class="text-right"><span class="counter total_unresolved_issues">0</span></li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="clearfix"></div>
+            </div>
+         </div>
+         <div class="col-md-8" style="display:none">
+            <div class="white-box">
+               <div class="col-xs-12">
+                  <div class="">
+                     <div class="pull-right">
+                        <a href="javascript: void(0)" id="get_chart_employee_issue" class="chart-issues-link chart-issues-link-1 active">Employee / Issues</a> |
+                        <a href="javascript: void(0)" id="get_chart_project_issue" class="chart-issues-link">Project / Issues</a>
+                     </div>
+                     <div id="chart_employee_issues"/>
+                  </div>
+               </div>
+            <div class="clearfix"></div>
+            </div>
+         </div>
+         <div class="clearfix"></div>
+      </div>
+      <div class="row">
+         <div class="col-12">
+            <div class="panel panel-default">
+               <div class="panel-heading">Overdue Tasks</div>
+               <div class="panel-wrapper">
+                  <div class="panel-body overdue-tasks-container">
+                     
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-6" style="display:none">
+            <div class="panel panel-default">
+               <div class="panel-heading">Pending Issues</div>
+               <div class="panel-wrapper">
+                  <div class="panel-body pending-issue-container">
+                     
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="clearfix"></div>
+      </div>
+      <div class="row">
+         <div class="col-6" id="section-line-1">
+            <div class="panel panel-default">
+               <div class="panel-heading">Project Activity Timeline</div>
+               <div class="panel-wrapper">
+                  <div class="panel-body">
+                     <div class="steamline project-time-activity-container">
+                        
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-6 user-activities-timeline">
+            <div class="panel panel-default">
+               <div class="panel-heading">Employee Activity Timeline</div>
+               <div class="panel-wrapper">
+                  <div class="panel-body">
+                     <div class="steamline user-activity-timeline-container">
+                        
+                     </div> 
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </t>
+</templates>
