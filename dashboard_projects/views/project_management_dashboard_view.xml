@@ -1,0 +1,26 @@
+<openerp>
+    <data>
+        <record id="action_project_management_dashboard" model="ir.actions.client">
+            <field name="name">Projects Dashboard</field>
+            <field name="tag">dashboard_projects.dashboard</field>
+        </record>
+        
+        <menuitem id="menu_project_management_dashboard"
+                  parent="project.menu_main_pm"
+                  sequence="-1" action="action_project_management_dashboard" groups="project.group_project_manager"/>
+    </data>
+    
+    <data noupdate="1">
+        <record id="project_stage_2" model="project.task.type">
+            <field name="sequence">20</field>
+            <field name="name">Done</field>
+            <field name="fold" eval="True"/>
+        </record>
+        <record id="project_stage_3" model="project.task.type">
+            <field name="sequence">30</field>
+            <field name="name">Cancelled</field>
+            <field name="legend_done">Ready to reopen</field>
+            <field name="fold" eval="True"/>
+        </record>
+    </data>
+</openerp>

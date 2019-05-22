@@ -1,0 +1,12 @@
+<openerp>
+    <data>
+        <template id="assets_backend" name="project_management_dashboard_assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/dashboard_projects/static/src/css/project_management_dashboard.css"/>
+                
+                <script type="text/javascript" src="/dashboard_projects/static/src/lib/highcharts.js"></script>
+                <script type="text/javascript" src="/dashboard_projects/static/src/js/project_management_dashboard.js"></script>
+            </xpath>
+        </template>
+    </data>
+</openerp>
