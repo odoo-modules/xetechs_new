@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+  <t t-extend="ListView.buttons">
+    <t t-jquery=".o_list_buttons" t-operation="append">
+        <button type="button" class="btn btn-secondary o_list_button_export d-none" accesskey="u">
+            Export
+        </button>
+        <span class="o_list_button_switch"/>
+    </t>
+  </t>
+    <t t-name="ListView.switch">
+        <span class="o_switch_btn list-group-item">
+            <input id="o_switch_input" class="columnCheckbox" type="checkbox"/>
+            <button type="button" class="btn-toggle project-feature-toggle" title="Editable">
+                <span class="toggle-icon">
+                    <i t-attf-class="fa fa-times"/>
+                </span>
+            </button>
+        </span>
+    </t>
+    <t t-name="ListView.columns">
+        <div class="btn-group btn-group-sm" id="th_columns" role="group">
+            <button aria-expanded="true" aria-haspopup="true" class="btn btn-primary dropdown-toggle o_customize_btn" data-toggle="dropdown" id="dyncolbtn" type="button">
+              <img class="o_customize_ico" src="/web_dynamic_list/static/src/img/settings.svg"/>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu th_ul ui-sortable" role="menu">
+                <li class="list-group-item no-sort o_search_group">
+                    <input autocomplete="off" autofocus="autofocus" class="form-control" data-seq="-1" id="col-search" placeholder="Search Column" type="text"/>
+                    <button class="btn btn-sm btn-primary" id="restore_default" title="Restore list" type="button"><i class="fa fa-refresh"></i></button>
+                </li>
+                <li class="divider no-sort" role="separator"></li>
+                <t t-foreach="widget.fields" t-as="column">
+                    <li t-attf-class="list-group-item ui-sortable-handle o_item o_menu_item#{column.invisible ? ' d-none' : ''}" t-att-data-id="column.id">
+                        <div class="o_row">
+                            <div class="col col-1 cola-md-1 o_handler" id="handler">
+                              <i class="o_row_handle fa fa-arrows"/>
+                            </div>  
+                            <div class="col col-7 cola-md-7" id="o-column_name">
+                              <span t-esc="column.string"/>
+                            </div>
+                            <div class="col col-2 cola-md-2">
+                                <div class="material-switcha column-switch">
+                                    <input class="columnCheckbox" t-att-data-seq="column.sequence" type="checkbox" t-att-id="column.name" t-att-checked="(column.active ? true : undefined)" t-att-name="column.name"/>
+                                    <button type="button" t-attf-class="btn-toggle project-feature-toggle #{column.active ? 'is-checked' : ''}">
+                                      <span class="toggle-icon">
+                                       <i t-attf-class="fa #{column.active ? 'fa-check' : 'fa-times'}"/>
+                                      </span>
+                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </t>
+            </ul>
+        </div>
+    </t>
+    <t t-extend="BillsListView.upload_button">
+        <t t-jquery="button.o_button_upload_bill" t-operation="after">
+            <button type="button" class="btn btn-default btn-sm o_list_button_export" accesskey="u">
+            Export
+        </button>
+        <span class="o_list_button_switch"/>
+        </t>
+    </t>
+</templates>
