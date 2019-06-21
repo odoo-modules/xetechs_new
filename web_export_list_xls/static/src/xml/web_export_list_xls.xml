@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates id="template" xml:space="preserve">
+	<t t-name="WebExportListview">
+	    <div class="o_cp_sidebar btn-group btn-group-sm">
+	        <button class="btn btn-primary o_export_listview py-0" type="button" title="Export Listview xls" style="font-size:large">
+	            <i t-translation="off" class="fa fa-file-excel-o"/>
+	        </button>
+	    </div>
+	</t>
+</templates>

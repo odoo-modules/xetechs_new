@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <template id="assets_backend" name="web_export_list_xls assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/web_export_list_xls/static/src/js/web_export_list_xls.js"></script>
+        </xpath>
+    </template>
+</odoo>
