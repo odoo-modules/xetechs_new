@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>        
+	<record id="view_order_form_inherit" model="ir.ui.view">
+		<field name="name">sale.order.form</field>
+		<field name="model">sale.order</field>
+		<field name="inherit_id" ref="sale.view_order_form"/>
+		<field name="arch" type="xml">
+			<xpath expr="//header/button[@name='action_unlock']" position="after">
+				<button name="action_create_emi" type="object" string="Create EMI" states="done"/>
+			</xpath>
+			<xpath expr="//div[@name='button_box']" position="inside">
+                <div class="oe_raw">
+	                <button name="action_invoice_emi" attrs="{'invisible': [('emi_unpaid', '=', 0)]}"
+	                    type="object"
+	                    class="oe_stat_button"
+	                    icon="fa-pencil-square-o">
+	                    <field name="emi_paid" widget="statinfo"/>/<field name="emi_unpaid"  widget="statinfo"/>
+	                </button>
+                </div>
+            </xpath>
+		</field>
+	</record>
+</odoo>
