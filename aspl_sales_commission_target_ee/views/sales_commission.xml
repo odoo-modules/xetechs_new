@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="sales_commission_form_view" model="ir.ui.view">
+            <field name="name">sales.commission.form</field>
+            <field name="model">sales.commission</field>
+            <field name="arch" type="xml">
+                <form create="false" edit="false" delete="false">
+                    <sheet>
+                        <group col="4">
+                            <field name="name"/>
+                            <field name="sale_id" invisible="1"/>
+                            <field name="user_id"/>
+                            <field name="client"/>
+                            <field name="commission_date"/>
+                            <field name="user_sales_amount"/>
+                            <field name="amount"/>
+                            <field name="pay_by"/>
+                            <field name="when_paid"/>
+                            <field name="state"/>
+                            <field name="payslip_id" invisible="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="sales_commission_tree_view" model="ir.ui.view">
+            <field name="name">sales.commission.tree</field>
+            <field name="model">sales.commission</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="false" decoration-success="state == 'paid'" decoration-danger="state == 'cancel'">
+                    <field name="name"/>
+                    <field name="sale_id" invisible="1"/>
+                    <field name="user_id"/>
+                    <field name="client"/>
+                    <field name="commission_date"/>
+                    <field name="user_sales_amount"/>
+                    <field name="amount"/>
+                    <field name="pay_by"/>
+                    <field name="when_paid"/>
+                    <field name="state"/>
+                    <field name="invoice_id" invisible="1"/>
+                    <field name="payslip_id" invisible="1"/>
+                    <button string="Cancel" name="state_cancel" type="object" icon="fa-times fa-lg"
+                            confirm="Do you really want to cancel this Commission ?"
+                            attrs="{'invisible':['|',('invoice_id','!=',False),('state','!=','draft')]}"/>
+                    <button class="btn-primary" string="Set to Draft" name="state_draft" type="object"
+                            attrs="{'invisible':[('state','!=','cancel')]}" groups="base.group_erp_manager"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sales_commission_graph_view" model="ir.ui.view">
+            <field name="name">Sales Commission Graph</field>
+            <field name="model">sales.commission</field>
+            <field name="arch" type="xml">
+                <graph string="Commission">
+                    <field name="commission_date" type="row" interval="month"/>
+                    <field name="amount" type="measure"/>
+                    <field name="user_sales_amount" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="sales_commission_search_view" model="ir.ui.view">
+            <field name="name">sales.commission.search</field>
+            <field name="model">sales.commission</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field string="Source Document" name="name" filter_domain="[('name','ilike',self)]"/>
+                    <field string="User" name="user_id" filter_domain="[('user_id','ilike',self)]"/>
+                    <field string="Client" name="client" filter_domain="[('client','ilike',self)]"/>
+                    <field string="Pay By" name="pay_by" filter_domain="[('pay_by','=',self)]"/>
+                    <field string="State" name="state" filter_domain="[('state','=',self)]"/>
+                    <separator/>
+                    <filter string="Salary" name="salary" domain="[('pay_by','=','salary')]"/>
+                    <filter string="Invoice" name="invoice" domain="[('pay_by','=','invoice')]"/>
+                    <separator/>
+                    <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                    <filter string="Paid" name="paid" domain="[('state','=','paid')]"/>
+                    <filter string="Cancel" name="cancel" domain="[('state','=','cancel')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="User" name="user" context="{'group_by': 'user_id'}"/>
+                        <filter string="Paid Date" name="paiddate" context="{'group_by': 'when_paid'}"/>
+                        <filter string="Commission Date" name="commissiondate" context="{'group_by': 'commission_date'}"/>
+                        <filter string="Client" name="client" context="{'group_by': 'client'}"/>
+                        <filter string="Pay By" name="payby" context="{'group_by': 'pay_by'}"/>
+                        <filter string="State" name="state" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_sales_commission_view" model="ir.actions.act_window">
+            <field name="name">Sales Person Commission</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sales.commission</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="sales_commission_search_view"/>
+            <field name="domain">[('cons_id','=',False)]</field>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_sales_person_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="sales_commission_tree_view"/>
+            <field name="act_window_id" ref="action_sales_commission_view"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_sales_person_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="sales_commission_form_view"/>
+            <field name="act_window_id" ref="action_sales_commission_view"/>
+        </record>
+
+        <record id="sales_cons_dist_commission_form_view" model="ir.ui.view">
+            <field name="name">sales.cons.dist.commission.form</field>
+            <field name="model">sales.commission</field>
+            <field name="arch" type="xml">
+                <form create="false" edit="false" delete="false">
+                    <sheet>
+                        <group col="4">
+                            <field name="name"/>
+                            <field name="sale_id" invisible="1"/>
+                            <field name="type"/>
+                            <field name="cons_id"/>
+                            <field name="client"/>
+                            <field name="commission_date"/>
+                            <field name="amount"/>
+                            <field name="pay_by"/>
+                            <field name="when_paid"/>
+                            <field name="state"/>
+                            <field name="payslip_id" invisible="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="sales_cons_dist_commission_tree_view" model="ir.ui.view">
+            <field name="name">sales.cons.dist.commission.tree</field>
+            <field name="model">sales.commission</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="false"  decoration-success="state == 'paid'" decoration-danger="state == 'cancel'">
+                    <field name="name"/>
+                    <field name="sale_id" invisible="1"/>
+                    <field name="type"/>
+                    <field name="cons_id"/>
+                    <field name="client"/>
+                    <field name="commission_date"/>
+                    <field name="amount"/>
+                    <field name="pay_by"/>
+                    <field name="when_paid"/>
+                    <field name="state"/>
+                    <field name="invoice_id" invisible="1"/>
+                    <field name="payslip_id" invisible="1"/>
+                    <field name="reference_invoice_id" invisible="1"/>
+                    <button string="Cancel" name="state_cancel" type="object" icon="fa-times fa-lg"
+                            confirm="Do you really want to cancel this Commission ?"
+                            attrs="{'invisible':['|',('invoice_id','!=',False),('state','!=','draft')]}"/>
+                    <button string="Set to Draft" name="state_draft" type="object"
+                            attrs="{'invisible':[('state','!=','cancel')]}" groups="base.group_erp_manager"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sales_cons_dist_commission_search_view" model="ir.ui.view">
+            <field name="name">sales.cons.dist.commission.search</field>
+            <field name="model">sales.commission</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field string="Source Document" name="name" filter_domain="[('name','ilike',self)]"/>
+                    <field string="Type" name="type" filter_domain="[('type','=',self)]"/>
+                    <field string="Customer" name="cons_id" filter_domain="[('cons_id','ilike',self)]"/>
+                    <field string="Client" name="client" filter_domain="[('client','ilike',self)]"/>
+                    <field string="Pay By" name="pay_by" filter_domain="[('pay_by','=',self)]"/>
+                    <field string="State" name="state" filter_domain="[('state','=',self)]"/>
+                    <separator/>
+                    <filter string="Salary" name="salary" domain="[('pay_by','=','salary')]"/>
+                    <filter string="Invoice" name="invoice" domain="[('pay_by','=','invoice')]"/>
+                    <separator/>
+                    <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                    <filter string="Paid" name="paid" domain="[('state','=','paid')]"/>
+                    <filter string="Cancel" name="cancel" domain="[('state','=','cancel')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Customer" name="customer" context="{'group_by': 'cons_id'}"/>
+                        <filter string="Paid Date" name="paiddate" context="{'group_by': 'when_paid'}"/>
+                        <filter string="Commission Date" name="commissiondate" context="{'group_by': 'commission_date'}"/>
+                        <filter string="Client" name="client" context="{'group_by': 'client'}"/>
+                        <filter string="Pay By" name="payby" context="{'group_by': 'pay_by'}"/>
+                        <filter string="State" name="state" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_cons_commission_view" model="ir.actions.act_window">
+            <field name="name">Consultant/Distributor Commission</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sales.commission</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="sales_cons_dist_commission_search_view"/>
+            <field name="domain">[('user_id','=',False)]</field>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_cons_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="sales_cons_dist_commission_tree_view"/>
+            <field name="act_window_id" ref="action_cons_commission_view"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_cons_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="sales_cons_dist_commission_form_view"/>
+            <field name="act_window_id" ref="action_cons_commission_view"/>
+        </record>
+
+        <menuitem name="Sales Commission" id="main_menu_sales_commission"
+                  parent="sale.sale_menu_root" sequence="5"/>
+
+        <menuitem name="Configuration" id="main_menu_sales_commission_config"
+                  parent="main_menu_sales_commission" sequence="7" groups="base.group_erp_manager"/>
+
+        <menuitem action="action_sales_commission_view" id="menuitem_sales_commission"
+                  parent="main_menu_sales_commission" sequence="1"/>
+
+        <menuitem action="action_cons_commission_view" id="menuitem_cons_commission_view"
+                  parent="main_menu_sales_commission" sequence="2"/>
+
+    </data>
+</odoo>

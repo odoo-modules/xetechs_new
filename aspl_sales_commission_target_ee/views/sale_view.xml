@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="aspl_inherit_sale_order_form_view" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <field name="team_id" position="attributes">
+                    <attribute name="attrs">{'readonly': [('state', 'in', ['sale', 'done', 'cancel'])]}</attribute>
+                </field>
+                <field name="user_id" position="attributes">
+                    <attribute name="attrs">{'readonly': [('state', 'in', ['sale', 'done', 'cancel'])]}</attribute>
+                </field>
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="consultant_ids" widget="many2many_tags"
+                           attrs="{'readonly': [('state', 'in', ['sale', 'done', 'cancel'])]}"/>
+                </xpath>
+                <xpath expr="//sheet//notebook" position="inside">
+                    <page string="Sales Commission">
+                        <group col="4">
+                            <field name="commission_calc" class="oe_inline"
+                                   attrs="{'readonly': [('state', 'in', ['sale', 'done', 'cancel'])]}"/>
+                            <field name="commission_role_ids" widget="many2many_tags" options="{'no_create': True}"
+                                   attrs="{'readonly': [('state', 'in', ['sale', 'done', 'cancel'])]}"/>
+                        </group>
+                        <field name="sale_order_comm_ids">
+                            <tree editable="bottom">
+                                <field name="commission_type"/>
+                                <field name="user_id"/>
+                                <field name="partner_id"/>
+                                <field name="job_id"/>
+                                <field name="commission" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="order_id" invisible="1"/>
+                                <field name="user_sales_amount" invisible="1"/>
+                                <button name="commission_details" icon="fa-list-alt fa-lg" type="object"
+                                        string="Commission Details"/>
+                            </tree>
+                        </field>
+                        <field name="details_ids" style="display:none;"/>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="aspl_inherit_sales_config_settings_form_view" model="ir.ui.view">
+            <field name="name">sale.settings</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@data-key='sale_management']" position="inside">
+                    <h2>Sales Commission</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-xs-12 col-md-6 o_setting_box">
+                            <h2>Sales Person Commission</h2>
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="commission_pay_on" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="commission_pay_on"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="commission_pay_by" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="commission_pay_by"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="commission_included_amount" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="commission_included_amount"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="sales_person_commission_account_id" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="sales_person_commission_account_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-6 o_setting_box">
+                            <h2>Distributor Commission</h2>
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="dist_commission_pay_on" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="dist_commission_pay_on"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="dist_commission_pay_by" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="dist_commission_pay_by"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="dist_commission_included_amount" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="dist_commission_included_amount"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="distributor_commission_account_id" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="distributor_commission_account_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-6 o_setting_box">
+                            <h2>Consultant Commission</h2>
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="cons_commission_pay_on" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="cons_commission_pay_on"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="cons_commission_pay_by" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="cons_commission_pay_by"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="cons_commission_included_amount" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="cons_commission_included_amount"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="consultant_commission_account_id" class="col-md-3 o_light_label"
+                                               style="font-weight:bold;"/>
+                                        <field name="consultant_commission_account_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

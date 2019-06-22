@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="aspl_inherit_view_hr_payslip_form" model="ir.ui.view">
+            <field name="name">hr.payslip.form</field>
+            <field name="model">hr.payslip</field>
+            <field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
+            <field name="arch" type="xml">
+                <field name="line_ids" position="after">
+                    <group>
+                        <field name="sale_commission_amount" invisible="1"/>
+                        <field name="commission_line_ids" widget="many2many_tags" invisible="1"/>
+                    </group>
+                </field>
+                <field name="credit_note" position="after">
+                    <field name="override_target" groups="base.group_erp_manager"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="aspl_inherit_view_hr_employee_form" model="ir.ui.view">
+            <field name="name">hr.employee.form</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <button name="toggle_active" position="after">
+                    <button name="commission_graph" type="object" class="oe_stat_button" icon="fa-bar-chart" string="Commission"
+                     attrs="{'invisible': [('user_id', '=', False)]}"/>
+                </button>
+            </field>
+        </record>
+
+    </data>
+</odoo>
