@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="aspl_sales_person_view_config_form" model="ir.ui.view">
+            <field name="name">sales.person.configuration.form</field>
+            <field name="model">sales.person.configuration</field>
+            <field name="arch" type="xml">
+                <form string="Configure Sales Commission" class="oe_form_configuration">
+                    <header>
+                        <button string="Apply" type="object" name="apply_config" class="oe_highlight"/>
+                    </header>
+                    <separator string="Sale Person Commission Configuration"/>
+                    <group>
+                        <field name="sales_person_all"/>
+                        <field name="sales_person_job_ids" widget="many2many_tags" attrs="{'invisible':[('sales_person_all','==',True)]}"/>
+                        <field name="sales_person_ids" widget="many2many_tags" attrs="{'invisible':[('sales_person_all','==',True)]}" context="{'ctx_job_ids': sales_person_job_ids}"/>
+                    </group>
+                    <group string="Commission Based On" col="8">
+                        <field name="to_customer"/>
+                        <field name="to_product"/>
+                        <field name="to_product_categ"/>
+                        <field name="to_sales_team"/>
+                    </group>
+                    <group>
+                        <group string="Customer" attrs="{'invisible': [('to_customer', '=', False)]}">
+                            <field name="all_customers"/>
+                            <field name="user_ids" widget="many2many_tags" attrs="{'invisible':[('all_customers','=',True)]}"/>
+                            <field name="customer_compute_price_type" attrs="{'required': [('to_customer', '=', True)]}"/>
+                            <field name="customer_commission" attrs="{'required': [('to_customer', '=', True)]}"/>
+                        </group>
+
+                        <group string="Product" attrs="{'invisible': [('to_product', '=', False)]}">
+                            <field name="all_products"/>
+                            <field name="product_ids" widget="many2many_tags" attrs="{'invisible':[('all_products','=',True)]}"/>
+                            <field name="product_compute_price_type" attrs="{'required': [('to_product', '=', True)]}"/>
+                            <field name="product_commission" attrs="{'required': [('to_product', '=', True)]}"/>
+                        </group>
+
+                        <group string="Product Category" attrs="{'invisible': [('to_product_categ', '=', False)]}">
+                            <field name="all_categories"/>
+                            <field name="category_ids" widget="many2many_tags" attrs="{'invisible':[('all_categories','=',True)]}"/>
+                            <field name="product_categ_compute_price_type" attrs="{'required': [('to_product_categ', '=', True)]}"/>
+                            <field name="product_categ_commission" attrs="{'required': [('to_product_categ', '=', True)]}"/>
+                        </group>
+
+                        <group string="Sales Team" attrs="{'invisible': [('to_sales_team', '=', False)]}">
+                            <field name="all_sales_teams"/>
+                            <field name="team_ids" widget="many2many_tags" attrs="{'invisible':[('all_sales_teams','=',True)]}"/>
+                            <field name="team_compute_price_type" attrs="{'required': [('to_sales_team', '=', True)]}"/>
+                            <field name="team_commission" attrs="{'required': [('to_sales_team', '=', True)]}"/>
+                        </group>
+
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_sales_person_config_view" model="ir.actions.act_window">
+            <field name="name">Sales Person Configuration</field>
+            <field name="res_model">sales.person.configuration</field>
+            <field name="view_type">form</field>
+            <field name="target">inline</field>
+            <field name="view_mode">form</field>
+        </record>
+
+        <menuitem action="action_sales_person_config_view" id="menu_sales_person_action_config"
+                  parent="main_menu_sales_commission_config" sequence="1"/>
+
+    </data>
+</odoo>
