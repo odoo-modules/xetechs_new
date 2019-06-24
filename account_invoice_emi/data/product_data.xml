@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding='UTF-8'?>
+<odoo>
+    <record id="service_project_product_emi" model="product.product">
+        <field name="name">Project Product</field>
+        <field name="type">service</field>
+        <field name="invoice_policy">order</field>
+        <field name="taxes_id">False</field>
+    </record>
+</odoo>
