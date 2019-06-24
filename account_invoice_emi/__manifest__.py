@@ -14,6 +14,7 @@
     'data': [
         'data/ir_sequence_data.xml',
         'data/auto_create_invoice.xml',
+        'data/product_data.xml',
         'security/ir.model.access.csv',
         'views/account_invoice_emi.xml',
         'views/sales_order.xml',

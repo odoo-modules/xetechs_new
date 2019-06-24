@@ -1,17 +1,42 @@
 # -*- coding: utf-8 -*-
 
-from odoo.exceptions import ValidationError,UserError
+from odoo.exceptions import ValidationError, UserError
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 from odoo import models, fields, api, _
-import time
 
 
 class Account_Invoice_EMI(models.Model):
     _name = "account.invoice.emi"
 
-    name = fields.Char(string='Account Invoice EMI', required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
+    @api.depends('so_id')
+    def _compute_sales_order_amount(self):
+        """
+        Compute the amounts of the Sales Order line.
+        """
+        for line in self:
+            so_line_amount = 0.0
+            down_amount = 0.0
+            if line.so_id:
+                for so_line in line.so_id.order_line:
+                    if not so_line.is_downpayment:
+                        so_line_amount += so_line.price_subtotal
+                    else:
+                        down_amount += so_line.price_unit
+            line.update({
+                'so_amount': so_line_amount - down_amount,
+            })
+
+    @api.depends('so_id.invoice_ids', 'inv_emi_lines.state', 'state')
+    def get_total_invoice(self):
+        for res in self:
+            res.total_invoice = len(res.so_id.mapped('invoice_ids'))
+            res.emi_amount = round(sum([x.inv_amount for x in res.inv_emi_lines]), 2)
+            res.interest_amount = round(sum([x.interest_amount for x in res.inv_emi_lines]), 2)
+            res.total_amount = res.emi_amount + res.interest_amount
+
+    name = fields.Char(string='EMI Number', required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
     so_id = fields.Many2one('sale.order', string="Sales Order", required=True, domain="[('state', '=', 'done')]")
     type = fields.Selection([
             ('fixed', 'Fixed'),
@@ -19,25 +44,30 @@ class Account_Invoice_EMI(models.Model):
         ], string="EMI Type", default="manual")
     total = fields.Integer(string="Total EMI")
     total_emi = fields.Integer(string="Total EMI")
-    paid_total = fields.Integer(string="Total Paid EMI")
+    paid_total = fields.Integer(string="Invoiced EMI")
     interest = fields.Float(string="Interest Rate")
     inv_emi_lines = fields.One2many('account.invoice.emi.line', 'acc_inv_emi_id', string="EMI Lines")
     currency_id = fields.Many2one(related="so_id.currency_id", string="Currency", readonly=True, required=True)
-    so_amount = fields.Monetary(related="so_id.amount_total", string='SO Amount', store="True")
+    so_amount = fields.Float(compute='_compute_sales_order_amount', string='SO Amount', readonly=True, store=True)
     state = fields.Selection([
             ('draft', 'Draft'),
             ('confirm', 'Confirm'),
-            ('process', 'Process'),
+            ('to_approved', 'To Be Approved'),
+            ('approved', 'Approved'),
             ('done', 'Done'),
         ], string="State", default="draft")
-    partner_id = fields.Many2one('res.partner', string='Customer')
-    project_name = fields.Char(string='Project Name', copy=False, readonly=True, index=True, default=lambda self: _('New'))
-
+    partner_id = fields.Many2one(related="so_id.partner_id", string='Customer', store=True)
+    project_name = fields.Char(string='Project Name')
+    total_invoice = fields.Integer(string="Total Invoice", compute="get_total_invoice", store=True)
+    emi_amount = fields.Float(string="EMI Amount", compute="get_total_invoice", store=True)
+    interest_amount = fields.Float(string="EMI Interest", compute="get_total_invoice", store=True)
+    total_amount = fields.Float(string="Total Amount", compute="get_total_invoice", store=True)
+    currency_id = fields.Many2one("res.currency", related='so_id.currency_id', string="Currency", readonly=True, required=True)
 
     @api.onchange('interest')
     def onchange_total_interest(self):
-        if self.interest < 0:
-            raise ValidationError(_("Interest must be positive value"))
+        if self.interest < 0 and self.interest > 100:
+            raise ValidationError(_("Interest must be positive value and lessthen 100"))
 
     @api.onchange('total')
     def onchange_total_total(self):
@@ -50,7 +80,7 @@ class Account_Invoice_EMI(models.Model):
         if self.type:
             self.total = 0
             self.interest = 0
-    
+
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
@@ -59,7 +89,6 @@ class Account_Invoice_EMI(models.Model):
             else:
                 vals['name'] = self.env['ir.sequence'].next_by_code('account.invoice.emi') or _('New')
         result = super(Account_Invoice_EMI, self).create(vals)
-        result.project_name = 'Project Name'
         result.partner_id = result.so_id.partner_id.id
         return result
 
@@ -80,9 +109,9 @@ class Account_Invoice_EMI(models.Model):
             if self.total <= 0:
                 raise ValidationError(_("Total Invoice must be > 0"))
             invoice = self.so_amount / self.total
+            print ("sndfhgnfjg", invoice)
             interest = (invoice * self.interest)/100
             line_data = self.inv_emi_lines
-            self.total_emi = self.total
             date = datetime.now()
             for t in range(self.total):
                 line = line_data.new()
@@ -95,29 +124,46 @@ class Account_Invoice_EMI(models.Model):
                 line.state = 'draft'
                 self.inv_emi_lines = self.inv_emi_lines | line
                 date = datetime.strptime((date+relativedelta(months=1)).strftime(DEFAULT_SERVER_DATE_FORMAT), DEFAULT_SERVER_DATE_FORMAT)
-        else:
-            self.total_emi = len(self.inv_emi_lines.ids) 
+        self.total_emi = len(self.inv_emi_lines.ids)
+        if len(self.inv_emi_lines) == 0:
+            raise ValidationError(_("Please create some EMI"))
         total = sum(rec.inv_amount for rec in self.inv_emi_lines)
         self.partner_id = self.so_id.partner_id.id
-        if total != self.so_amount:
-            raise ValidationError(_("Total amount of  EMI amount must be Equal to sale order amount "))
+        if round(total, 2) != self.so_amount:
+            raise ValidationError(_("Total amount of  EMI amount must be Equal to sale order amount1"))
         self.so_id.write({'emi_unpaid': len(self.inv_emi_lines.ids),
                           'is_emi_created': True,
-                          'account_invoice_emi_id':self.id
-                           })
+                          'account_invoice_emi_id': self.id})
         return self.write({'state': 'confirm'})
 
     @api.multi
-    def action_process(self):
+    def action_to_be_approved(self):
+        return self.write({'state': 'to_approved'})
+
+    @api.multi
+    def action_approved(self):
         for res in self.inv_emi_lines:
             res.state = 'to_invoice'
-        return self.write({'state': 'process'})
+        return self.write({'state': 'approved'})
 
     @api.multi
     def action_done(self):
         if not all([x.state == 'invoiced' for x in self.inv_emi_lines]):
             raise ValidationError(_("You can not set done, some EMI need to create invoice panding"))
         return self.write({'state': 'done'})
+
+    @api.multi
+    def action_view_invoice(self):
+        invoices = self.so_id.mapped('invoice_ids')
+        action = self.env.ref('account.action_invoice_tree1').read()[0]
+        if len(invoices) > 1:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        elif len(invoices) == 1:
+            action['views'] = [(self.env.ref('account.invoice_form').id, 'form')]
+            action['res_id'] = invoices.ids[0]
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+        return action
 
 
 class Account_Invoice_EMI_Line(models.Model):
@@ -150,16 +196,7 @@ class Account_Invoice_EMI_Line(models.Model):
 
     @api.multi
     def create_invoice(self):
-        product_id = self.env['ir.config_parameter'].sudo().get_param('sale.default_deposit_product_id')
-        product_data = self.env['product.product'].browse(int(product_id))
-
-        # Create deposit product if necessary
-        if not product_data:
-            vals = self._prepare_deposit_product()
-            product_data = self.env['product.product'].create(vals)
-            self.env['ir.config_parameter'].sudo().set_param('sale.default_deposit_product_id', product_data.id)
-
-        sale_line_obj = self.env['sale.order.line']
+        product_data = self.env.ref('account_invoice_emi.service_project_product_emi')
         for order in self.acc_inv_emi_id.so_id:
             order.emi_paid += 1
             amount = self.inv_amount + self.interest_amount
@@ -176,18 +213,6 @@ class Account_Invoice_EMI_Line(models.Model):
             analytic_tag_ids = []
             for line in order.order_line:
                 analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.analytic_tag_ids]
-            so_line = sale_line_obj.create({
-                'name': _('%s : EMI %s / %s') % (product_data.name, order.emi_paid, order.emi_unpaid),
-                'price_unit': amount,
-                'product_uom_qty': 0.0,
-                'order_id': order.id,
-                'discount': 0.0,
-                'product_uom': product_data.uom_id.id,
-                'product_id': product_data.id,
-                'analytic_tag_ids': analytic_tag_ids,
-                'tax_id': [(6, 0, tax_ids)],
-                'is_downpayment': True,
-            })
             del context
             inv_obj = self.env['account.invoice']
             ir_property_obj = self.env['ir.property']
@@ -205,41 +230,41 @@ class Account_Invoice_EMI_Line(models.Model):
 
             if self.inv_amount <= 0.00:
                 raise UserError(_('The value of the down payment amount must be positive.'))
-            context = {'lang': order.partner_id.lang}
+            # context = {'lang': order.partner_id.lang}
             name = _('%s : EMI %s / %s') % (product_data.name, order.emi_paid, order.emi_unpaid)
             invoice = inv_obj.create({
-            'name': order.client_order_ref or order.name,
-            'origin': order.name,
-            'type': 'out_invoice',
-            'reference': False,
-            'account_id': order.partner_id.property_account_receivable_id.id,
-            'partner_id': order.partner_invoice_id.id,
-            'partner_shipping_id': order.partner_shipping_id.id,
-            'invoice_line_ids': [(0, 0, {
-                'name': name,
+                'name': order.client_order_ref or order.name,
                 'origin': order.name,
-                'account_id': account_id,
-                'price_unit': amount,
-                'quantity': 1.0,
-                'discount': 0.0,
-                'uom_id': product_data.uom_id.id,
-                'product_id': product_data.id,
-                'sale_line_ids': [(6, 0, [so_line.id])],
-                'invoice_line_tax_ids': [(6, 0, tax_ids)],
-                'analytic_tag_ids': [(6, 0, so_line.analytic_tag_ids.ids)],
-                'account_analytic_id': order.analytic_account_id.id or False,
-            })],
-            'currency_id': order.pricelist_id.currency_id.id,
-            'payment_term_id': order.payment_term_id.id,
-            'fiscal_position_id': order.fiscal_position_id.id or order.partner_id.property_account_position_id.id,
-            'team_id': order.team_id.id,
-            'user_id': order.user_id.id,
-            'comment': order.note,
-            })
+                'type': 'out_invoice',
+                'reference': False,
+                'account_id': order.partner_id.property_account_receivable_id.id,
+                'partner_id': order.partner_invoice_id.id,
+                'partner_shipping_id': order.partner_shipping_id.id,
+                'invoice_line_ids': [(0, 0, {
+                    'name': name,
+                    'origin': order.name,
+                    'account_id': account_id,
+                    'price_unit': amount,
+                    'quantity': 1.0,
+                    'discount': 0.0,
+                    'uom_id': product_data.uom_id.id,
+                    'product_id': product_data.id,
+                    # 'sale_line_ids': [(6, 0, [so_line.id])],
+                    'invoice_line_tax_ids': [(6, 0, tax_ids)],
+                    'analytic_tag_ids': [(6, 0, analytic_tag_ids)],
+                    'account_analytic_id': order.analytic_account_id.id or False,
+                })],
+                'currency_id': order.pricelist_id.currency_id.id,
+                'payment_term_id': order.payment_term_id.id,
+                'fiscal_position_id': order.fiscal_position_id.id or order.partner_id.property_account_position_id.id,
+                'team_id': order.team_id.id,
+                'user_id': order.user_id.id,
+                'comment': order.note,
+                })
             invoice.compute_taxes()
             invoice.message_post_with_view('mail.message_origin_link',
-                    values={'self': invoice, 'origin': order},
-                    subtype_id=self.env.ref('mail.mt_note').id)
+                                           values={'self': invoice, 'origin': order},
+                                           subtype_id=self.env.ref('mail.mt_note').id)
             self.invoice_id = invoice.id
             self.state = 'invoiced'
             self.acc_inv_emi_id.paid_total += 1
@@ -247,16 +272,6 @@ class Account_Invoice_EMI_Line(models.Model):
             return self.acc_inv_emi_id.so_id.action_view_invoice()
         return {'type': 'ir.actions.act_window_close'}
 
-    def _prepare_deposit_product(self):
-        return {
-            'name': 'Project Product',
-            'type': 'service',
-            'invoice_policy': 'order',
-            'property_account_income_id': False,
-            'taxes_id': [(6, 0, [])],
-            'company_id': False,
-        }
-    
     @api.model
     def auto_create_invoice_emi(self):
         current_date = fields.Date.context_today(self)
