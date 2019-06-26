@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 
 
 class SaleOrder(models.Model):
@@ -22,6 +22,29 @@ class SaleOrder(models.Model):
             'res_id': self.account_invoice_emi_id.id,
             'views': [[False, "form"]],
         }
+        
+    def action_create_emi(self):
+        if not self.account_invoice_emi_id:
+            context = {'default_so_id': self.id,
+                       'default_active': True}
+            return {
+                    'name': _('Account Invoice EMI'),
+                    'view_type': 'form',
+                    'view_mode': 'form',
+                    'res_model': 'account.invoice.emi',
+                    'view_id': self.env.ref('account_invoice_emi.view_account_invoice_emi_form').id,
+                    'type': 'ir.actions.act_window',
+                    'context': context,
+                    }
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'account.invoice.emi',
+            'res_id': self.account_invoice_emi_id.id,
+            'views': [[False, "form"]],
+        } 
+            
 
     @api.model
     def create(self, vals):
