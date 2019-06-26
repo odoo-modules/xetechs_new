@@ -34,8 +34,8 @@
             <form string="Account Invoice EMI">
                 <header>
                         <button name="action_confirm" string="Confirm" type="object" states="draft" class="btn-primary"/>
-                        <button name="action_to_be_approved" type="object" string="To Be Approved"  class="btn-primary" states="confirm"/>
-                        <button name="action_approved" type="object" string="Approved"  class="btn-primary" states="to_approved"/>
+                        <button name="action_to_be_approved" type="object" string="To Be Approved"  class="btn-primary" states="confirm" groups="account_invoice_emi.group_account_invoice_emi_to_be_approved"/>
+                        <button name="action_approved" type="object" string="Approved"  class="btn-primary" states="to_approved" groups="account_invoice_emi.group_account_invoice_emi_approved"/>
                         <button name="action_done" type="object" string="Done"  class="btn-primary" states="approved"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirm,to_approved,approved,done"/>
                 </header>
@@ -64,20 +64,22 @@
                         <field name="paid_total" invisible='1'/>
                         <field name="total_emi" invisible='1'/>
                         <group>
-                            <field name="so_id" options="{'no_create': True}" domain="[('is_emi_created', '=', False), ('state', 'in', ['done', 'sale'])]"/>
+                            <field name="so_id" options="{'no_create': True}" attrs="{'readonly': [('state', '!=', 'draft')]}" domain="[('is_emi_created', '=', False), ('state', 'in', ['done', 'sale'])]"/>
+                            <field name="journal_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                             <field name="partner_id"  readonly="1"/>
-                            <field name="project_name" required="1"/>
-                            <field name="type"/>
+                            <field name="project_name" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="type" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                         </group>
                         <group>
-                            <field name="total" attrs="{'invisible': [('type', '=', 'manual')], 'required': [('type', '=', 'fixed')]}"/>
-                            <field name="interest"/>
+                            <field name="total" attrs="{'invisible': [('type', '=', 'manual')], 'required': [('type', '=', 'fixed')], 'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="interest" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                             <field name="so_amount"/>
+                            <field name="start_date" attrs="{'invisible': [('type', '=', 'manual')], 'required': [('type', '=', 'fixed')], 'readonly': [('state', '!=', 'draft')]}"/>
                         </group>
                     </group>
                     <notebook>
                         <page name="emi_detail">
-                            <field name="inv_emi_lines" mode="tree">
+                            <field name="inv_emi_lines" mode="tree" attrs="{'readonly': [('state', '!=', 'draft')]}">
                                 <tree editable="bottom">
                                     <field name="sequence"/>
                                     <field name="invoice_id" options="{'no_create': True, 'no_edit': True}"/>
@@ -146,9 +148,45 @@
             <field name="act_window_id" ref="action_account_invoice_emi"/>
     </record>
 
+    <record id="view_account_invoice_emi_line_tree" model="ir.ui.view">
+        <field name="name">account.invoice.emi.line.tree</field>
+        <field name="model">account.invoice.emi.line</field>
+        <field name="arch" type="xml">
+            <tree string="Account Invoice EMI Line" create="false" delete="false">
+                <field name="sequence"/>
+                <field name="invoice_id" options="{'no_create': True, 'no_edit': True}"/>
+                <field name="date"/>
+                <field name="inv_amount"/>
+                <field name="interest_amount"/>
+                <field name="total"/>
+                <field name="state" invisible='1'/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_emi_line" model="ir.actions.act_window">
+        <field name="name">EMI Line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">account.invoice.emi.line</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_account_invoice_emi_line_tree"/>
+    </record>
+
     <menuitem id="menu_account_invoice_emi"
             name="Account Invoice EMI"
             parent="sale.sale_order_menu"
+            sequence="2"/>
+    
+    <menuitem id="menu_emi"
+            name="EMI"
+            parent="menu_account_invoice_emi"
             action="action_account_invoice_emi"
+            sequence="2"/>
+
+     <menuitem id="menu_emi_line"
+            name="EMI Line"
+            parent="menu_account_invoice_emi"
+            action="action_emi_line"
             sequence="2"/>
 </odoo>

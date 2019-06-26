@@ -41,10 +41,10 @@ class Account_Invoice_EMI(models.Model):
     type = fields.Selection([
             ('fixed', 'Fixed'),
             ('manual', 'Manual'),
-        ], string="EMI Type", default="manual")
+        ], string="EMI Type", default="manual",)
     total = fields.Integer(string="Total EMI")
-    total_emi = fields.Integer(string="Total EMI")
-    paid_total = fields.Integer(string="Invoiced EMI")
+    total_emi = fields.Integer(string="Total EMI", readonly=True)
+    paid_total = fields.Integer(string="Invoiced EMI", readonly=True)
     interest = fields.Float(string="Interest Rate")
     inv_emi_lines = fields.One2many('account.invoice.emi.line', 'acc_inv_emi_id', string="EMI Lines")
     currency_id = fields.Many2one(related="so_id.currency_id", string="Currency", readonly=True, required=True)
@@ -55,14 +55,16 @@ class Account_Invoice_EMI(models.Model):
             ('to_approved', 'To Be Approved'),
             ('approved', 'Approved'),
             ('done', 'Done'),
-        ], string="State", default="draft")
+        ], string="State", default="draft", select=True, readonly=True, copy=False)
     partner_id = fields.Many2one(related="so_id.partner_id", string='Customer', store=True)
     project_name = fields.Char(string='Project Name')
-    total_invoice = fields.Integer(string="Total Invoice", compute="get_total_invoice", store=True)
+    total_invoice = fields.Integer(string="Total Invoice", compute="get_total_invoice")
     emi_amount = fields.Float(string="EMI Amount", compute="get_total_invoice", store=True)
     interest_amount = fields.Float(string="EMI Interest", compute="get_total_invoice", store=True)
     total_amount = fields.Float(string="Total Amount", compute="get_total_invoice", store=True)
+    journal_id = fields.Many2one('account.journal', string="Payment Journal")
     currency_id = fields.Many2one("res.currency", related='so_id.currency_id', string="Currency", readonly=True, required=True)
+    start_date = fields.Date(string="Start Date")
 
     @api.onchange('interest')
     def onchange_total_interest(self):
@@ -112,18 +114,18 @@ class Account_Invoice_EMI(models.Model):
             print ("sndfhgnfjg", invoice)
             interest = (invoice * self.interest)/100
             line_data = self.inv_emi_lines
-            date = datetime.now()
+            date = self.start_date
             for t in range(self.total):
                 line = line_data.new()
                 line.acc_inv_emi_id = self.id
                 line.sequence = t + 1
-                line.date = date.date()
+                line.date = date
                 line.inv_amount = invoice
                 line.interest_amount = interest
                 line.total = interest + invoice
                 line.state = 'draft'
                 self.inv_emi_lines = self.inv_emi_lines | line
-                date = datetime.strptime((date+relativedelta(months=1)).strftime(DEFAULT_SERVER_DATE_FORMAT), DEFAULT_SERVER_DATE_FORMAT)
+                date = date + relativedelta(months=1)
         self.total_emi = len(self.inv_emi_lines.ids)
         if len(self.inv_emi_lines) == 0:
             raise ValidationError(_("Please create some EMI"))
@@ -260,6 +262,7 @@ class Account_Invoice_EMI_Line(models.Model):
                 'team_id': order.team_id.id,
                 'user_id': order.user_id.id,
                 'comment': order.note,
+                'journal_id': self.acc_inv_emi_id.journal_id and self.acc_inv_emi_id.journal_id.id or False
                 })
             invoice.compute_taxes()
             invoice.message_post_with_view('mail.message_origin_link',

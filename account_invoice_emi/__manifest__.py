@@ -13,6 +13,7 @@
     'depends': ['sale_management'],
     'data': [
         'data/ir_sequence_data.xml',
+        'security/account_invoice_emi_security.xml',
         'data/auto_create_invoice.xml',
         'data/product_data.xml',
         'security/ir.model.access.csv',
