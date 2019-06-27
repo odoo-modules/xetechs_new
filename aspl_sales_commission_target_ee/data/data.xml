@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="sales.commission.role" id="data_sales_person">
+            <field name="name">Sales Person</field>
+        </record>
+
+        <record model="sales.commission.role" id="data_consultant">
+            <field name="name">Consultant</field>
+        </record>
+
+        <record model="sales.commission.role" id="data_distributor">
+            <field name="name">Distributor</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,17 @@
+<odoo>
+    <record id="commission_summary_mail_template" model="mail.template">
+        <field name="name">Commission Summary</field>
+        <field name="report_template" ref="aspl_sales_commission_target_ee.report_print_commission_summary"/>
+        <field name="subject">Commission Summary</field>
+        <field name="model_id" ref="aspl_sales_commission_target_ee.model_wizard_commission_summary"/>
+        <field name="auto_delete" eval="False"/>
+        <field name="body_html">
+            <![CDATA[
+                <p>
+                    Hello, This is sales commission Summary.
+                    Commission Summary pdf is attached.
+                </p>
+            ]]>
+        </field>
+    </record>
+</odoo>

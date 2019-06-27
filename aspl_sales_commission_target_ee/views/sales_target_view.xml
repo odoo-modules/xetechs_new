@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="commission_sales_target_tree_view" model="ir.ui.view">
+            <field name="name">sales.target.tree</field>
+            <field name="model">sales.target</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="user_id"/>
+                    <field name="target_period"/>
+                    <field name="date_start"/>
+                    <field name="date_end"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="commission_sales_target_form_view" model="ir.ui.view">
+            <field name="name">sales.target.form</field>
+            <field name="model">sales.target</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="target_confirmed" string="Confirm" type="object" class="oe_highlight"
+                            attrs="{'invisible': [('state', '!=', 'draft')]}"
+                            confirm="Are you sure, you want to confirm this sales target ?"
+                            groups="base.group_erp_manager"/>
+                        <button name="set_to_draft" string="Set to Draft" type="object"
+                            groups="base.group_erp_manager" attrs="{'invisible': [('state', '!=', 'cancel')]}"/>
+                        <button name="target_cancel" string="Cancel Target" type="object"
+                            groups="base.group_erp_manager" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="commission_graph" type="object" class="oe_stat_button" icon="fa-bar-chart" string="Commission"
+                            attrs="{'invisible': [('state', 'not in', ['confirmed', 'closed'])]}"/>
+                        </div>
+                        <div>
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="user_id" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="target_period" required="1"
+                                    attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            </group>
+                            <group>
+                                <field name="date_start" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="date_end" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            </group>
+                            <button name="generate_target_period" string="Generate Target Period" type="object"
+                                class="oe_inline oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"
+                                context="{'ctx_generate_target_call': True}" groups="base.group_erp_manager"/>
+                        </group>
+                        <notebook>
+                            <page name="target_lines" string="Target Lines">
+                                <field name="check_lines_state" invisible="1"/>
+                                <field name="target_lines">
+                                    <tree editable="bottom" delete="false" create="false">
+                                        <field name="start_date" required="1" readonly="1"/>
+                                        <field name="end_date" required="1" readonly="1"/>
+                                        <field name="target_amount" required="1"
+                                            attrs="{'readonly': [('target_state', '!=', 'open')]}"/>
+                                        <field name="commission_amount"/>
+                                        <field name="target_state" invisible="1"/>
+                                        <field name="target_id" invisible="1"/>
+                                        <button string="Cancel" name="state_cancel" type="object" icon="fa-times fa-lg"
+                                            attrs="{'invisible':[('target_state', '!=', 'open')]}"
+                                            groups="base.group_erp_manager"/>
+                                        <button string="Set to Open" name="state_open" type="object" icon="fa fa-undo"
+                                            attrs="{'invisible':[('target_state', '!=', 'cancel')]}"
+                                            groups="base.group_erp_manager"/>
+                                    </tree>
+                                    <form>
+                                        <group col="4">
+                                            <field name="start_date" required="1" readonly="1"/>
+                                            <field name="end_date" required="1" readonly="1"/>
+                                            <field name="target_amount" required="1"
+                                                attrs="{'readonly': [('target_state', '=', 'closed')]}"/>
+                                            <field name="target_state" invisible="1"/>
+                                            <field name="target_id" invisible="1"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers" help="Follow this sales target to automatically track the events associated to sales person of this target."/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_sales_target_view" model="ir.actions.act_window">
+            <field name="name">Sales Target</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sales.target</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    From here you can create sales target of sales person.
+                </p>
+            </field>
+        </record>
+
+        <menuitem action="action_sales_target_view" id="menuitem_sales_target_action"
+            parent="main_menu_sales_commission" sequence="8"/>
+
+    </data>
+</odoo>

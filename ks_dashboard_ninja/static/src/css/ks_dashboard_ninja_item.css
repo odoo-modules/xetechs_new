@@ -1,0 +1,94 @@
+.ks_item_icon {
+    width : 110px !important;
+}
+
+.ks_item_icon>img {
+    width : 50px;
+}
+
+.ks_field_required{
+    color : red;
+}
+
+.ks_db_item_preview{
+    width: 280px;
+}
+
+.ks_not_click{
+    pointer-events: none;
+}
+
+.ks_color_picker{
+    margin-right: 10px;
+}
+
+.ks_color_opacity{
+    vertical-align:middle;
+}
+
+/* Icon Container in image widget render view*/
+.ks_image_widget_icon_container{
+    background : transparent;
+    border: none;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.ks_domain_content{
+    overflow : auto;
+}
+
+
+/* Preview Footer Note */
+.ks_db_item_preview_footer_note{
+    margin-top : 10px;
+}
+
+
+/*Container CSS*/
+
+.ks_md_heading{
+    justify-content: center;
+    font-size: 17px;
+}
+
+
+/* Dashboard Menu CSS*/
+.ks_dashboard_menu_container{
+    padding: 10px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+    border-radius: 5px;
+    min-width: 160px;
+}
+
+
+.ks_dashboard_menu_container > li{
+    margin: 2px;
+    display:flex;
+}
+
+
+.ks_dashboard_menu_container > li > button{
+    margin-top : 5px;
+    margin-left: 2px;
+    border-radius: 5px;
+}
+
+
+#ks_add_item_selection,#ks_date_selector_container{
+    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
+
+#ks_dashboard_layout_edit{
+    border-radius: 3px;
+    color: #fff;
+    /*background-color: #357bb7;*/
+    /*border: 1px solid #357bb7;*/
+}
+
+.ks_add_item_type_button{
+    color:#fff;
+    /*background-color: #357bb7;
+    border: 1px solid #357bb7;*/
+    border-radius: 3px;
+}

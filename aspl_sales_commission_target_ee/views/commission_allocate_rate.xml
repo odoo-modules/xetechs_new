@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="aspl_res_partner_commission_allocation_tree" model="ir.ui.view">
+            <field name="name">res.partner.commission.tree</field>
+            <field name="model">res.partner.commission</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="false">
+                    <field name="partner_id"/>
+                    <field name="job_id"/>
+                    <field name="user_ids"/>
+                    <field name="compute_price_type"/>
+                    <field name="commission"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="aspl_res_partner_commission_allocation_search" model="ir.ui.view">
+            <field name="name">res.partner.commission.search</field>
+            <field name="model">res.partner.commission</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field string="Partner" name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
+                    <field string="Job" name="job_id" filter_domain="[('job_id','ilike',self)]"/>
+                    <field string="User" name="user_ids" filter_domain="[('user_ids','ilike',self)]"/>
+                    <field string="Type" name="compute_price_type" filter_domain="[('compute_price_type','ilike',self)]"/>
+                    <field string="Amount" name="commission" filter_domain="[('commission','ilike',self)]"/>
+                    <separator/>
+                    <filter string="Percentage" name="percentage" domain="[('compute_price_type','=','per')]"/>
+                    <filter string="Fix Price" name="fixprice" domain="[('compute_price_type','=','fix_price')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Partner" name="partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Job" name="job" context="{'group_by': 'job_id'}"/>
+                        <filter string="Type" name="type" context="{'group_by': 'compute_price_type'}"/>
+                        <filter string="Amount" name="amount" context="{'group_by': 'commission'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_commission_allocation_view" model="ir.actions.act_window">
+            <field name="name">Sales Person</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner.commission</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id="aspl_res_partner_cons_allocation_tree" model="ir.ui.view">
+            <field name="name">consultant.commission.tree</field>
+            <field name="model">consultant.commission</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="false">
+                    <field name="cons_id"/>
+                    <field name="partner_id"/>
+                    <field name="compute_price_type"/>
+                    <field name="commission"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="aspl_res_partner_cons_commission_allocation_search" model="ir.ui.view">
+            <field name="name">consultant.commission.search</field>
+            <field name="model">consultant.commission</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field string="Consultant" name="cons_id" filter_domain="[('cons_id','ilike',self)]"/>
+                    <field string="Partner" name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
+                    <field string="Type" name="compute_price_type" filter_domain="[('compute_price_type','ilike',self)]"/>
+                    <field string="Amount" name="commission" filter_domain="[('commission','ilike',self)]"/>
+                    <separator/>
+                    <filter string="Percentage" name="percentage" domain="[('compute_price_type','=','per')]"/>
+                    <filter string="Fix Price" name="fixprice" domain="[('compute_price_type','=','fix_price')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Consultant" name="consultant" context="{'group_by': 'cons_id'}"/>
+                        <filter string="Partner" name="partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Type" name="type" context="{'group_by': 'compute_price_type'}"/>
+                        <filter string="Amount" name="amount" context="{'group_by': 'commission'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_cons_commission_allocation_view" model="ir.actions.act_window">
+            <field name="name">Consultant</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">consultant.commission</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id="aspl_res_partner_dist_allocation_tree" model="ir.ui.view">
+            <field name="name">distributor.commission.tree</field>
+            <field name="model">distributor.commission</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" delete="false">
+                    <field name="cons_id"/>
+                    <field name="partner_id"/>
+                    <field name="compute_price_type"/>
+                    <field name="commission"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="aspl_res_partner_dist_commission_allocation_search" model="ir.ui.view">
+            <field name="name">distributor.commission.search</field>
+            <field name="model">distributor.commission</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field string="Distributor" name="cons_id" filter_domain="[('cons_id','ilike',self)]"/>
+                    <field string="Partner" name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
+                    <field string="Type" name="compute_price_type" filter_domain="[('compute_price_type','ilike',self)]"/>
+                    <field string="Amount" name="commission" filter_domain="[('commission','ilike',self)]"/>
+                    <separator/>
+                    <filter string="Distributor" name="distributor" domain="[('compute_price_type','=','per')]"/>
+                    <filter string="Fix Price" name="fixprice" domain="[('compute_price_type','=','fix_price')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Distributor" name="distributorgroup" context="{'group_by': 'cons_id'}"/>
+                        <filter string="Partner" name="partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Type" name="type" context="{'group_by': 'compute_price_type'}"/>
+                        <filter string="Amount" name="amount" context="{'group_by': 'commission'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_dist_commission_allocation_view" model="ir.actions.act_window">
+            <field name="name">Distributor</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">distributor.commission</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <menuitem name="Commission Allocate Rate" id="main_menu_commission_allocation_rate"
+                  parent="main_menu_sales_commission" sequence="6" groups="base.group_erp_manager"/>
+
+        <menuitem action="action_commission_allocation_view" id="menuitem_sales_person_allocation"
+                  parent="main_menu_commission_allocation_rate" sequence="1"/>
+
+        <menuitem action="action_cons_commission_allocation_view" id="menuitem_cons_allocation"
+                  parent="main_menu_commission_allocation_rate" sequence="2"/>
+
+        <menuitem action="action_dist_commission_allocation_view" id="menuitem_dist_allocation"
+                  parent="main_menu_commission_allocation_rate" sequence="3"/>
+
+    </data>
+</odoo>
