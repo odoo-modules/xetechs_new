@@ -57,7 +57,7 @@ class Account_Invoice_EMI(models.Model):
             ('done', 'Done'),
         ], string="State", default="draft", select=True, readonly=True, copy=False)
     partner_id = fields.Many2one(related="so_id.partner_id", string='Customer', store=True)
-    project_name = fields.Char(string='Project Name')
+    project_id = fields.Many2one("project.project", string='Project Name')
     total_invoice = fields.Integer(string="Total Invoice", compute="get_total_invoice")
     emi_amount = fields.Float(string="EMI Amount", compute="get_total_invoice", store=True)
     interest_amount = fields.Float(string="EMI Interest", compute="get_total_invoice", store=True)
@@ -111,7 +111,6 @@ class Account_Invoice_EMI(models.Model):
             if self.total <= 0:
                 raise ValidationError(_("Total Invoice must be > 0"))
             invoice = self.so_amount / self.total
-            print ("sndfhgnfjg", invoice)
             interest = (invoice * self.interest)/100
             line_data = self.inv_emi_lines
             date = self.start_date
@@ -182,7 +181,7 @@ class Account_Invoice_EMI_Line(models.Model):
                 'interest_amount': interest_amount,
                 'total': interest_amount + line.inv_amount,
             })
-
+    name = fields.Char(string="Number")
     acc_inv_emi_id = fields.Many2one('account.invoice.emi', string="Invoice EMI")
     sequence = fields.Integer(string="No.")
     date = fields.Date(string="Date")
@@ -195,6 +194,17 @@ class Account_Invoice_EMI_Line(models.Model):
             ('invoiced', 'Invoiced'),
         ], string="State", default="draft")
     invoice_id = fields.Many2one('account.invoice', string="Invoice#")
+    sale_order_id = fields.Many2one(related="acc_inv_emi_id.so_id", string="Sale Order")
+    project_id = fields.Many2one(related="acc_inv_emi_id.project_id", string="Project")
+    inv_status = fields.Selection(related="invoice_id.state", string="Invoice Status")
+
+    @api.multi
+    def name_get(self):
+        result = []
+        for rec in self:
+            name = rec.acc_inv_emi_id.name + '-' + str(rec.sequence)
+            result.append((rec.id, name))
+        return result
 
     @api.multi
     def create_invoice(self):

@@ -14,7 +14,7 @@
                 <field name="name"/>
                 <field name="so_id"/>
                 <field name="partner_id"/>
-                <field name="project_name"/>
+                <field name="project_id"/>
                 <field name="type"/>
                 <field name="paid_total"/>
                 <field name="total_emi"/>
@@ -23,6 +23,7 @@
                 <field name="emi_amount"/>
                 <field name="interest_amount"/>
                 <field name="total_amount"/>
+                <field name="state"/>
             </tree>
         </field>
     </record>
@@ -64,10 +65,10 @@
                         <field name="paid_total" invisible='1'/>
                         <field name="total_emi" invisible='1'/>
                         <group>
-                            <field name="so_id" options="{'no_create': True}" attrs="{'readonly': [('state', '!=', 'draft')]}" domain="[('is_emi_created', '=', False), ('state', 'in', ['done', 'sale'])]"/>
-                            <field name="journal_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="so_id" attrs="{'readonly': [('state', '!=', 'draft')]}" domain="[('is_emi_created', '=', False), ('state', 'in', ['done', 'sale'])]" options="{'no_create_edit': True}"/>
+                            <field name="journal_id" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'no_create_edit': True, 'no_open': True, 'no_create': True}"/>
                             <field name="partner_id"  readonly="1"/>
-                            <field name="project_name" required="1" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="project_id" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'no_create_edit': True}" domain="[('partner_id', '=', partner_id)]"/>
                             <field name="type" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                         </group>
                         <group>
@@ -154,12 +155,15 @@
         <field name="arch" type="xml">
             <tree string="Account Invoice EMI Line" create="false" delete="false">
                 <field name="sequence"/>
+                <field name="sale_order_id"/>
+                <field name="project_id"/>
                 <field name="invoice_id" options="{'no_create': True, 'no_edit': True}"/>
                 <field name="date"/>
-                <field name="inv_amount"/>
-                <field name="interest_amount"/>
-                <field name="total"/>
-                <field name="state" invisible='1'/>
+                <field name="inv_amount" sum="Total"/>
+                <field name="interest_amount" sum="Total"/>
+                <field name="total" sum="Total"/>
+                <field name="state"/>
+                <field name="inv_status"/>
             </tree>
         </field>
     </record>

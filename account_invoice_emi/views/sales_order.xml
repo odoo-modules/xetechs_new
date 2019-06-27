@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header/button[@name='action_unlock']" position="after">
-                <button name="action_create_emi" type="object" string="Create EMI" states="done"/>
+                <button name="action_create_emi" type="object" string="Create EMI" attrs="{'invisible': ['|', ('state', 'not in', ['done', 'sale']), ('is_emi_created', '=', True)]}"/>
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <div class="oe_raw">
