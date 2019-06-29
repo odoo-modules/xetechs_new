@@ -38,6 +38,8 @@
                         <button name="action_to_be_approved" type="object" string="To Be Approved"  class="btn-primary" states="confirm" groups="account_invoice_emi.group_account_invoice_emi_to_be_approved"/>
                         <button name="action_approved" type="object" string="Approved"  class="btn-primary" states="to_approved" groups="account_invoice_emi.group_account_invoice_emi_approved"/>
                         <button name="action_done" type="object" string="Done"  class="btn-primary" states="approved"/>
+                        <button name="action_reject" type="object" string="Reject"  class="btn-primary" states="to_approved,confirm"/>
+                        <button name="action_draft" type="object" string="To Draft"  class="btn-primary" states="reject"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirm,to_approved,approved,done"/>
                 </header>
                 <sheet>
@@ -65,22 +67,22 @@
                         <field name="paid_total" invisible='1'/>
                         <field name="total_emi" invisible='1'/>
                         <group>
-                            <field name="so_id" attrs="{'readonly': [('state', '!=', 'draft')]}" domain="[('is_emi_created', '=', False), ('state', 'in', ['done', 'sale'])]" options="{'no_create_edit': True}"/>
-                            <field name="journal_id" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'no_create_edit': True, 'no_open': True, 'no_create': True}"/>
+                            <field name="so_id" attrs="{'readonly': [('state', 'not in', ['draft', 'confirm'])]}" domain="[('is_emi_created', '=', False), ('state', 'in', ['done', 'sale'])]" options="{'no_create_edit': True}"/>
+                            <field name="journal_id" attrs="{'readonly': [('state', 'not in', ['draft', 'confirm'])]}" options="{'no_create_edit': True, 'no_open': True, 'no_create': True}"/>
                             <field name="partner_id"  readonly="1"/>
-                            <field name="project_id" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'no_create_edit': True}" domain="[('partner_id', '=', partner_id)]"/>
-                            <field name="type" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="project_id" attrs="{'readonly': [('state', 'not in', ['draft', 'confirm'])]}" options="{'no_create_edit': True}" domain="[('partner_id', '=', partner_id)]"/>
+                            <field name="type" attrs="{'readonly': [('state', 'not in', ['draft', 'confirm'])]}"/>
                         </group>
                         <group>
-                            <field name="total" attrs="{'invisible': [('type', '=', 'manual')], 'required': [('type', '=', 'fixed')], 'readonly': [('state', '!=', 'draft')]}"/>
-                            <field name="interest" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="total" attrs="{'invisible': [('type', '=', 'manual')], 'required': [('type', '=', 'fixed')], 'readonly': [('state', 'not in', ['draft', 'confirm'])]}"/>
+                            <field name="interest" attrs="{'readonly': [('state', 'not in', ['draft', 'confirm'])]}"/>
                             <field name="so_amount"/>
                             <field name="start_date" attrs="{'invisible': [('type', '=', 'manual')], 'required': [('type', '=', 'fixed')], 'readonly': [('state', '!=', 'draft')]}"/>
                         </group>
                     </group>
                     <notebook>
                         <page name="emi_detail">
-                            <field name="inv_emi_lines" mode="tree" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                            <field name="inv_emi_lines" mode="tree" attrs="{'readonly': [('state', 'not in', ['draft', 'confirm'])]}">
                                 <tree editable="bottom">
                                     <field name="sequence"/>
                                     <field name="invoice_id" options="{'no_create': True, 'no_edit': True}"/>

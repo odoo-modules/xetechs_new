@@ -55,6 +55,7 @@ class Account_Invoice_EMI(models.Model):
             ('to_approved', 'To Be Approved'),
             ('approved', 'Approved'),
             ('done', 'Done'),
+            ('reject', 'Reject')
         ], string="State", default="draft", select=True, readonly=True, copy=False)
     partner_id = fields.Many2one(related="so_id.partner_id", string='Customer', store=True)
     project_id = fields.Many2one("project.project", string='Project Name')
@@ -105,41 +106,66 @@ class Account_Invoice_EMI(models.Model):
     def action_confirm(self):
         if not self.so_id:
             raise ValidationError(_("Please select sales order"))
+        self._compute_sales_order_amount()
         if self.search([('so_id', '=', self.so_id.id), ('state', '=', 'confirm'), ('id', '!=', self.id)]):
             raise ValidationError(_("You can't confirm the Account invoice EMI record because same sales order selected confirm record exists."))
         if self.type == 'fixed':
-            if self.total <= 0:
-                raise ValidationError(_("Total Invoice must be > 0"))
-            invoice = self.so_amount / self.total
-            interest = (invoice * self.interest)/100
-            line_data = self.inv_emi_lines
-            date = self.start_date
-            for t in range(self.total):
-                line = line_data.new()
-                line.acc_inv_emi_id = self.id
-                line.sequence = t + 1
-                line.date = date
-                line.inv_amount = invoice
-                line.interest_amount = interest
-                line.total = interest + invoice
-                line.state = 'draft'
-                self.inv_emi_lines = self.inv_emi_lines | line
-                date = date + relativedelta(months=1)
+            self.make_emi_generate()
         self.total_emi = len(self.inv_emi_lines.ids)
         if len(self.inv_emi_lines) == 0:
             raise ValidationError(_("Please create some EMI"))
         total = sum(rec.inv_amount for rec in self.inv_emi_lines)
         self.partner_id = self.so_id.partner_id.id
         if round(total, 2) != self.so_amount:
-            raise ValidationError(_("Total amount of  EMI amount must be Equal to sale order amount1"))
+            raise ValidationError(_("Total amount of  EMI amount must be Equal to sale order amount"))
         self.so_id.write({'emi_unpaid': len(self.inv_emi_lines.ids),
                           'is_emi_created': True,
                           'account_invoice_emi_id': self.id})
         return self.write({'state': 'confirm'})
 
     @api.multi
+    def make_emi_generate(self):
+        self._cr.execute("DELETE FROM account_invoice_emi_line WHERE acc_inv_emi_id=%s""" % self.id)
+        if self.total <= 0:
+                raise ValidationError(_("Total Invoice must be > 0"))
+        invoice = self.so_amount / self.total
+        interest = (invoice * self.interest)/100
+        line_data = self.inv_emi_lines
+        date = self.start_date
+        for t in range(self.total):
+            line = line_data.new()
+            line.acc_inv_emi_id = self.id
+            line.sequence = t + 1
+            line.date = date
+            line.inv_amount = invoice
+            line.interest_amount = interest
+            line.total = interest + invoice
+            line.state = 'draft'
+            self.inv_emi_lines = self.inv_emi_lines | line
+            date = date + relativedelta(months=1)
+
+    @api.multi
     def action_to_be_approved(self):
+        if self.so_id:
+            self._compute_sales_order_amount()
+        if self.type == 'fixed':
+            self.make_emi_generate()
+        self.total_emi = len(self.inv_emi_lines.ids)
+        if len(self.inv_emi_lines) == 0:
+            raise ValidationError(_("Please create some EMI"))
+        total = sum(rec.inv_amount for rec in self.inv_emi_lines)
+        self.partner_id = self.so_id.partner_id.id
+        if round(total, 2) != self.so_amount:
+            raise ValidationError(_("Total amount of  EMI amount must be Equal to sale order amount"))
         return self.write({'state': 'to_approved'})
+
+    @api.multi
+    def action_draft(self):
+        return self.write({'state': 'draft'})
+
+    @api.multi
+    def action_reject(self):
+        return self.write({'state': 'reject'})
 
     @api.multi
     def action_approved(self):
@@ -291,3 +317,11 @@ class Account_Invoice_EMI_Line(models.Model):
         for account_inv_emi in self.search([('date', '=', current_date), ('state', '=', 'draft')]):
             account_inv_emi.create_invoice()
         return True
+
+    @api.multi
+    def create(self, vals):
+        res = super(Account_Invoice_EMI_Line, self).create(vals)
+        if res.acc_inv_emi_id.type != 'fix':
+            old_recoreds = self.env['account.invoice.emi.line'].search([('acc_inv_emi_id', '=', res.acc_inv_emi_id.id), ('id', '!=', res.id)])
+            res.sequence = len(old_recoreds) + 1
+        return res
