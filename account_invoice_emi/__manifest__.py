@@ -4,13 +4,13 @@
 {
     'name': 'Account Invoice EMI',
     'version': '12.0.1',
-    'author': 'Laxicon Solution',
-    'website': 'http://laxicon.in',
+    'author': 'xetechs',
+    'website': 'https://xetechs.com',
     'category': 'Account',
     'summary': 'Account Invoice EMI',
     'description': '''You can create Invoice EMI.
 ''',
-    'depends': ['sale_management'],
+    'depends': ['sale_management', 'project'],
     'data': [
         'data/ir_sequence_data.xml',
         'security/account_invoice_emi_security.xml',

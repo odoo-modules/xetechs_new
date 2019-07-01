@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	 <!-- Project -->
+        <record id="edit_project" model="ir.ui.view">
+            <field name="name">project.project.form</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//div[@name='button_box']" position="inside">
+                    <button class="oe_stat_button" type="action"
+                        name="%(action_project_issue)d" icon="fa-tasks">
+                        <field string="Issue" name="issue_count" widget="statinfo" options="{'label_field': 'label_issues'}"/>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_project_kanban_inherit">
+            <field name="name">project.project.kanban</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project_kanban"/>
+            <field name="arch" type="xml">
+                <xpath expr="//kanban/field[@name='label_tasks']" position="after">
+                    <field name="issue_count"/>
+                    <field name="label_issues"/>
+                </xpath>
+                <xpath expr="//a[hasclass('o_project_kanban_box')]" position="after">
+                    <a class="o_project_kanban_box" name="%(action_project_issue)d" type="action">
+                        <div>
+                            <span class="o_value"><t t-esc="record.issue_count.value"/></span>
+                            <span class="o_label"><t t-esc="record.label_issues.value"/></span>
+                        </div>
+                    </a>
+                </xpath>
+            </field>
+        </record>
+
+</odoo>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="project_issue_form_view" model="ir.ui.view">
+            <field name="name">project.issue.form.view</field>
+            <field name="model">project.issue</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <field name="stage_id" widget="statusbar" clickable="True"
+                            options="{'fold_field': 'fold'}"/>
+                    </header>
+                    <sheet string="Issue">
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="Issue Summary..."/></h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="assign_to"/>
+                                <field name="attachment" filename="file_name"/>
+                                <field name="file_name" invisible="1"/>
+                                <field name="issue_reported_date"/>
+                                <field name="tag_ids" widget="many2many_tags"/>
+                            </group>
+                            <group>
+                                <field name="due_date"/>
+                                <field name="project_id" context="{'default_use_issues':1}" options="{'no_create': True}"/>
+                                <field name="task_id" context="{'default_project_id':project_id}" options="{'no_create': True}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="description"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="project_issue_tree_view" model="ir.ui.view">
+            <field name="name">project.issue.tree.view</field>
+            <field name="model">project.issue</field>
+            <field name="arch" type="xml">
+                <tree string="Issue Tracker Tree">
+                    <field name="name"/>
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="assign_to"/>
+                    <field name="issue_reported_date"/>
+                    <field name="due_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_issue_search_form" model="ir.ui.view">
+            <field name="name">project.issue.search.view</field>
+            <field name="model">project.issue</field>
+            <field name="arch" type="xml">
+               <search string="Tasks">
+                    <field name="name" string="Tasks"/>
+                    <field name="tag_ids"/>
+                    <field name="project_id"/>
+                    <field name="assign_to"/>
+                    <field name="stage_id"/>
+                    <filter string="My Tasks" name="my_tasks" domain="[('user_id','=',uid)]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Project" name="project" context="{'group_by':'project_id'}"/>
+                        <filter string="Task" name="task" context="{'group_by':'name'}"/>
+                        <filter string="Assigned to" name="user" context="{'group_by':'assign_to'}"/>
+                        <filter string="Stage" name="stage" context="{'group_by':'stage_id'}"/>
+                        <filter string="Company" name="company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="project_issue_kanban_view" model="ir.ui.view">
+            <field name="name">project.issue.kanban</field>
+            <field name="model">project.issue</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="stage_id" class="o_kanban_small_column">
+                    <field name="color"/>
+                    <field name="name"/>
+                    <field name="assign_to"/>
+                    <field name="stage_id" options='{"group_by_tooltip": {"description": "Description", "legend_priority": "Use of stars"}}'/>
+                    <templates>
+                       <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
+                                <div class="oe_kanban_content">
+                                    <div class="o_kanban_record_top">
+                                        <div class="o_kanban_record_headings">
+                                            <strong class="o_kanban_record_title"><field name="name"/></strong><br/>
+                                            <small class="o_kanban_record_subtitle text-muted">
+                                                <field name="project_id"/>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="o_kanban_record_body">
+                                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                    </div>
+                                </div>
+                                <div class="oe_clear"></div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="action_project_issue" model="ir.actions.act_window">
+            <field name="name">Issues</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">project.issue</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_id" ref="project_issue_tree_view"/>
+            <field name="search_view_id" ref="view_issue_search_form"/>
+        </record>
+
+        <menuitem id="menu_project_issue_track"
+            name="Issues"
+            parent="project.menu_main_pm"
+            action="action_project_issue"
+            sequence="3"/>
+</odoo>
