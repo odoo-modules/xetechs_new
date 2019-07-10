@@ -35,10 +35,10 @@
             <form string="Account Invoice EMI">
                 <header>
                         <button name="action_confirm" string="Confirm" type="object" states="draft" class="btn-primary"/>
-                        <button name="action_to_be_approved" type="object" string="To Be Approved"  class="btn-primary" states="confirm" groups="account_invoice_emi.group_account_invoice_emi_to_be_approved"/>
+                        <button name="action_to_be_approved" type="object" string="Submit for Approval"  class="btn-primary" states="confirm" groups="account_invoice_emi.group_account_invoice_emi_to_be_approved"/>
                         <button name="action_approved" type="object" string="Approved"  class="btn-primary" states="to_approved" groups="account_invoice_emi.group_account_invoice_emi_approved"/>
                         <button name="action_done" type="object" string="Done"  class="btn-primary" states="approved"/>
-                        <button name="action_reject" type="object" string="Reject"  class="btn-primary" states="to_approved,confirm"/>
+                        <button name="action_reject" type="object" string="Reject"  class="btn-primary" states="to_approved"/>
                         <button name="action_draft" type="object" string="To Draft"  class="btn-primary" states="reject"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,confirm,to_approved,approved,done"/>
                 </header>
@@ -78,6 +78,7 @@
                             <field name="interest" attrs="{'readonly': [('state', 'not in', ['draft', 'confirm'])]}"/>
                             <field name="so_amount"/>
                             <field name="start_date" attrs="{'invisible': [('type', '=', 'manual')], 'required': [('type', '=', 'fixed')], 'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="emi_tax_ids" attrs="{'readonly': [('state', 'not in', ['draft', 'confirm'])]}" widget="many2many_tags" options="{'no_create_edit': True, 'no_open': True, 'no_create': True}"/>
                         </group>
                     </group>
                     <notebook>
