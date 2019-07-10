@@ -14,8 +14,10 @@ Issues for Projects
     'depends': ['project'],
     'data': [
         'security/ir.model.access.csv',
+        'data/ir_sequence_data.xml',
         'views/project_issue_views.xml',
-        'views/project_project_view.xml'
+        'views/project_project_view.xml',
+        'views/project_task_inherit_view.xml',
     ],
     'installable': True,
     'application': False,

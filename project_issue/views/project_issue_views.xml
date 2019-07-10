@@ -6,8 +6,7 @@
             <field name="arch" type="xml">
                 <form>
                     <header>
-                        <field name="stage_id" widget="statusbar" clickable="True"
-                            options="{'fold_field': 'fold'}"/>
+                        <field name="stage_id" widget="statusbar" clickable="True"/>
                     </header>
                     <sheet string="Issue">
                         <div class="oe_title">
@@ -20,17 +19,23 @@
                                 <field name="file_name" invisible="1"/>
                                 <field name="issue_reported_date"/>
                                 <field name="tag_ids" widget="many2many_tags"/>
+                                <field name="issue_category"/>
                             </group>
                             <group>
                                 <field name="due_date"/>
-                                <field name="project_id" context="{'default_use_issues':1}" options="{'no_create': True}"/>
-                                <field name="task_id" context="{'default_project_id':project_id}" options="{'no_create': True}"/>
+                                <field name="project_id" options="{'no_create': True}"/>
+                                <field name="task_id" domain="[('project_id', '=', project_id)]" options="{'no_create': True}"/>
+                                <field name="priority"  widget="priority"/>
                             </group>
                         </group>
                         <group>
                             <field name="description"/>
                         </group>
                     </sheet>
+                    <div class="oe_chatter">
+                      <field name="message_follower_ids" widget="mail_followers"/>
+                      <field name="message_ids" widget="mail_thread"/>
+                    </div>
                 </form>
             </field>
         </record>
@@ -79,6 +84,7 @@
             <field name="arch" type="xml">
                 <kanban default_group_by="stage_id" class="o_kanban_small_column">
                     <field name="color"/>
+                    <field name="priority"/>
                     <field name="name"/>
                     <field name="assign_to"/>
                     <field name="stage_id" options='{"group_by_tooltip": {"description": "Description", "legend_priority": "Use of stars"}}'/>
@@ -95,6 +101,7 @@
                                         </div>
                                     </div>
                                     <div class="o_kanban_record_body">
+                                        <field name="priority" widget="priority"/>
                                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                                     </div>
                                 </div>
@@ -113,6 +120,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">kanban,tree,form</field>
             <field name="view_id" ref="project_issue_tree_view"/>
+            <field name="context">{'default_project_id': context.get('project_id', False), 'default_task_id': context.get('id', False),}</field>
             <field name="search_view_id" ref="view_issue_search_form"/>
         </record>
 

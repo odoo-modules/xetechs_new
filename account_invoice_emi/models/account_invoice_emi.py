@@ -66,6 +66,7 @@ class Account_Invoice_EMI(models.Model):
     journal_id = fields.Many2one('account.journal', string="Payment Journal")
     currency_id = fields.Many2one("res.currency", related='so_id.currency_id', string="Currency", readonly=True, required=True)
     start_date = fields.Date(string="Start Date")
+    emi_tax_ids = fields.Many2many('account.tax', 'emi_line_tax', 'emi_line_id', 'tax_id', string='Taxes', domain=[('type_tax_use', '!=', 'none'), '|', ('active', '=', False), ('active', '=', True)])
 
     @api.onchange('interest')
     def onchange_total_interest(self):
@@ -242,11 +243,14 @@ class Account_Invoice_EMI_Line(models.Model):
                 raise UserError(_('The product used to invoice a down payment should have an invoice policy set to "Ordered quantities". Please update your deposit product to be able to create a deposit invoice.'))
             if product_data.type != 'service':
                 raise UserError(_("The product used to invoice a down payment should be of type 'Service'. Please use another product or update this product."))
-            taxes = product_data.taxes_id.filtered(lambda r: not order.company_id or r.company_id == order.company_id)
-            if order.fiscal_position_id and taxes:
-                tax_ids = order.fiscal_position_id.map_tax(taxes, product_data, order.partner_shipping_id).ids
+            if self.acc_inv_emi_id.emi_tax_ids:
+                tax_ids = self.acc_inv_emi_id.emi_tax_ids.ids
             else:
-                tax_ids = taxes.ids
+                taxes = product_data.taxes_id.filtered(lambda r: not order.company_id or r.company_id == order.company_id)
+                if order.fiscal_position_id and taxes:
+                    tax_ids = order.fiscal_position_id.map_tax(taxes, product_data, order.partner_shipping_id).ids
+                else:
+                    tax_ids = taxes.ids
             context = {'lang': order.partner_id.lang}
             analytic_tag_ids = []
             for line in order.order_line:
@@ -269,7 +273,10 @@ class Account_Invoice_EMI_Line(models.Model):
             if self.inv_amount <= 0.00:
                 raise UserError(_('The value of the down payment amount must be positive.'))
             # context = {'lang': order.partner_id.lang}
-            name = _('%s : EMI %s / %s') % (product_data.name, order.emi_paid, order.emi_unpaid)
+            if self.acc_inv_emi_id.project_id:
+                name = _('%s : EMI %s / %s') % (self.acc_inv_emi_id.project_id.name, order.emi_paid, order.emi_unpaid)
+            else:
+                name = _('%s : EMI %s / %s') % (product_data.name, order.emi_paid, order.emi_unpaid)
             invoice = inv_obj.create({
                 'name': order.client_order_ref or order.name,
                 'origin': order.name,
